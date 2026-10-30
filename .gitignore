@@ -9,3 +9,10 @@ build
 cmake-build-*
 
 vcpkg_installed
+# GUI (Python) build artifacts
+gui/dist/
+gui/build/
+gui/_vendor/
+gui/*.spec
+__pycache__/
+*.pyc

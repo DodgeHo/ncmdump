@@ -1,5 +1,103 @@
 # ncmdump
 
+> **这是 [taurusxin/ncmdump](https://github.com/taurusxin/ncmdump) 的 Fork。**
+> 原版的命令行 C++ 程序完整保留（用法见下方原文）。本 Fork 在此之上增加了一个
+> **Windows 图形界面版**：拖进去就能把 `.ncm` 单个或批量转换成 FLAC / MP3。
+
+![图形界面截图](gui/screenshot.png)
+
+## 图形界面版（本 Fork 新增）
+
+### 下载
+
+到本仓库的 [Releases](../../releases) 页面下载，解压后双击 `ncmdump-gui.exe` 即可，
+**不需要安装 Python 或 ffmpeg**——静态版 ffmpeg 已经内置在程序里。
+
+提供两种形式：
+
+| 文件 | 体积 | 特点 |
+| --- | --- | --- |
+| `ncmdump-gui.exe` | 约 43 MB | 单个 exe，拷到哪都能用；每次启动需解包到临时目录，约慢几秒 |
+| `ncmdump-gui-portable.zip` | 约 70 MB | 目录版，解压即用，启动更快（推荐） |
+
+### 用法
+
+1. 把 `.ncm` 文件**拖进**窗口中间的列表，或用「添加文件 / 添加文件夹」按钮。
+   添加文件夹会递归扫描子目录，适合一次处理整个下载目录。
+2. 选输出格式：**FLAC（无损）** / **MP3** / **与源文件相同**。
+3. 需要的话指定输出目录，留空则输出在源文件旁边。
+4. 点「开始转换」。
+
+### 功能
+
+| 项目 | 说明 |
+| --- | --- |
+| 输出格式 | FLAC / MP3 / 与源文件相同 |
+| MP3 码率 | 320 / 256 / 192 / 128 kbps |
+| FLAC 压缩级别 | 0–11（默认 5，只影响体积，不影响音质） |
+| 批量 | 多文件 + 文件夹递归，并行数 1–8 可调 |
+| 文件命名 | 「标题 - 艺术家」或沿用原文件名 |
+| 元数据 | 自动写回标题、艺术家、专辑、封面图 |
+| 歌词 | 同目录有同名 `.lrc` 时自动嵌入 |
+| 重名 | 默认跳过已存在文件，可勾选覆盖 |
+
+### 关于音质，有一件事要说清楚
+
+输出格式与源文件相同时**直接提取、不重编码**，音质零损失。
+
+反过来，源文件是 MP3 时选 FLAC，只是把有损音频装进无损容器——文件涨到三四倍，
+音质一点没变好。这种情况请选「与源文件相同」。
+
+### 和原版 C++ 程序的关系
+
+图形界面版**没有编译原版 C++**（那需要 vcpkg + taglib），而是把
+`src/ncmcrypt.cpp` 的解密算法逐行移植成了纯 Python：
+
+- AES-128-ECB 自行实现（S-box 由 GF(2⁸) 生成），不引入第三方加密库；
+- keybox 流密钥周期为 256 字节，预展开后整块 XOR，100 MB 的文件解密只需一两秒；
+- 元数据解析、封面提取、格式判定（ID3 头 → MP3，否则 FLAC）与原版一致。
+
+转码用内置 ffmpeg，标签写入用 [mutagen](https://github.com/quodlibet/mutagen)。
+实测解密结果与 ffprobe 校验的时长、码率、容器格式均与文件内嵌元数据吻合。
+
+### 目录结构
+
+```
+gui/
+  ncmcore.py     解密核心：AES-128-ECB + RC4-like keybox，元数据与封面解析
+  transcoder.py  ffmpeg 转码调用 + mutagen 写标签（含封面尺寸解析）
+  converter.py   单文件转换流程编排
+  gui.py         tkinter 图形界面（深色主题，支持拖拽）
+  app.py         程序入口
+  build.py       打包脚本
+  make_icon.py   生成图标
+```
+
+### 自己打包
+
+```bash
+pip install pyinstaller mutagen imageio-ffmpeg tkinterdnd2
+cd gui
+python build.py              # 目录版
+python build.py --onefile    # 单 exe 版
+```
+
+打包脚本会自动找一个**单文件静态版** ffmpeg（优先使用 `imageio-ffmpeg` 自带的）
+一起打进去。想换成自己的 ffmpeg，把 `ffmpeg.exe` 放到程序所在目录即可，程序会优先用它。
+
+### 说明
+
+- 只处理 `.ncm` 容器本身，不涉及任何授权判断——转换的是你已经下载到本地的文件。
+- 解密完全在本机进行，不联网。
+- 图形界面部分与上游同样按 MIT 发布，算法版权归 taurusxin/ncmdump 及其前辈作者。
+
+---
+
+# ncmdump（上游原版 README）
+
+以下内容为原版 README，未作改动。
+
+
 使用本程序可将下载的网易云音乐缓存文件（ncm）转换为 mp3 或 flac 格式
 
 ## 简介
