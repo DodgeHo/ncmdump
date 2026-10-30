@@ -10,7 +10,7 @@
 
 ### 下载
 
-到本仓库的 [Releases](../../releases) 页面下载，解压后双击 `ncmdump-gui.exe` 即可，
+到本仓库的 [Releases](https://github.com/DodgeHo/ncmdump/releases) 页面下载，解压后双击 `ncmdump-gui.exe` 即可，
 **不需要安装 Python 或 ffmpeg**——静态版 ffmpeg 已经内置在程序里。
 
 提供两种形式：
