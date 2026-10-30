@@ -91,6 +91,16 @@ python build.py --onefile    # 单 exe 版
 - 解密完全在本机进行，不联网。
 - 图形界面部分与上游同样按 MIT 发布，算法版权归 taurusxin/ncmdump 及其前辈作者。
 
+### 关于 ffmpeg 的许可证（请注意）
+
+仓库里的源码是 MIT，但**发布的二进制包内置了 ffmpeg**，而该 ffmpeg 是
+[GPL 授权的静态构建](https://ffmpeg.org/legal.html)（来自 imageio-ffmpeg / BtbN FFmpeg-Builds）。
+因此：
+
+- 分发出去的**二进制包**整体受 GPL 约束，需要提供 ffmpeg 的源码或书面索取方式；
+- 如果你希望分发物保持纯 MIT，把程序目录里的 `ffmpeg.exe` 换成一个 LGPL 构建即可
+  —— 程序会优先使用外部放置的 ffmpeg，而不是内置的。
+
 ---
 
 # ncmdump（上游原版 README）
